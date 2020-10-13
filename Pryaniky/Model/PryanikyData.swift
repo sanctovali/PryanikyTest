@@ -22,7 +22,7 @@ protocol DataPresentable {
 	var data: [String : Any] { get set }
 	var order: [String] { get set }
 }
-*/
+
 
 struct PryanikyData {
 	var data: [String : Any]
@@ -57,3 +57,52 @@ extension PryanikyData: JSONDecodable {
 		}
 	}
 }
+
+
+*/
+
+struct PryanikyData{
+	
+	var text: [Hz]
+	var pictures: [Picture]
+	var selectors: [Selector]
+	var order: [String]
+}
+
+extension PryanikyData: JSONDecodable {
+	init?(JSON: [String : AnyObject]) {
+		guard let order = JSON["view"] as? [String],
+			let recievedData = JSON["data"] as? [[String : AnyObject]] else { return nil }
+		self.order = []
+		self.text = []
+		self.pictures = []
+		self.selectors = []
+		
+		order.forEach { (view) in
+			if let type = PossibleTypes.init(rawValue: view) {
+				self.order.append(type.rawValue)
+			}
+		}
+
+		recievedData.forEach { (dictionary) in
+			guard let name = dictionary["name"] as? String,
+				let type = PossibleTypes.init(rawValue: name),
+				let data = dictionary["data"] as? [String : AnyObject] else { return }
+			switch type {
+			case .hz:
+				if let hz = Hz(JSON: data) {
+					self.text.append(hz)
+				}
+			case .picture:
+				if let picture = Picture(JSON: data) {
+					self.pictures.append(picture)
+				}
+			case .selector:
+				if let selector = Selector(JSON: data) {
+					self.selectors.append(selector)
+				}
+			}
+		}
+	}
+}
+

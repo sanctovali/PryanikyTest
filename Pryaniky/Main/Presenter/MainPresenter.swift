@@ -19,20 +19,23 @@ protocol MainViewProtocol: class {
 protocol MainPresenterProtocol: class {
 	init(view: MainViewProtocol)
 	func onViewDidLoad()
-	func getData(on index: Int) -> CellData
-	func onSelection(by index: Int)
-	func updateSelection(on index: Int, to id: Int)
-	var count: Int { get }
+	func getData(on indexPath: IndexPath) -> CellData
+	func onSelection(by indexPath: IndexPath)
+	func updateSelection(on indexPath: IndexPath, to id: Int)
+	func rowsInSection(_ section: Int) -> Int
+	var sections: Int { get }
 }
 
 class MainPresenter: MainPresenterProtocol {
 	
+	
+	
 	private let networkManager = PryanikyDataManager()
 	private weak var view: MainViewProtocol?
 	
-	private var items = PryanikyData(data: [:], order: [])
-	
-	var count: Int {
+	private var items = PryanikyData(text: [], pictures: [], selectors: [], order: [])
+
+	var sections: Int {
 		return items.order.count
 	}
 	
@@ -43,30 +46,41 @@ class MainPresenter: MainPresenterProtocol {
 	func onViewDidLoad() {
 		loadData()
 	}
-
-	/*
-			Вот тут я не аонял что оменно требовалось:
-			- отображать в таблице заголовки и по клику показывать что внутри?
-			- или в таблице отображать сразу элементы?
-			Первый вариант показался проще, вот выбрал второй. =)
-			В твком случае по IndexPath получаем индекс ключа, по ключу в презеторе получаем словарь, его конвертим в tuple данных с типом и генерим нужный тип ячейки.
-			Наверное для этого стоило сделать для этого отдельный адаптер.
-	*/
-	func getData(on index: Int) -> CellData {
-		let view = items.order[index]
-		
+	
+	func rowsInSection(_ section: Int) -> Int {
+		let view = items.order[section]
 		let type = PossibleTypes.init(rawValue: view)
 		
 		switch type {
 		case .hz:
-			guard let hz = items.data[view] as? Hz else { break }
-			return (type, hz.text, nil, nil, nil)
+			return items.text.count
 		case .picture:
-			guard let pictureData = items.data[view] as? Picture else { break }
+			return items.pictures.count
+		case .selector:
+			return items.selectors.count
+		default:
+			return 0
+		}
+	}
+
+	func getData(on indexPath: IndexPath) -> CellData {
+		let view = items.order[indexPath.section]
+		
+		let type = PossibleTypes.init(rawValue: view)
+		let row = indexPath.row
+		
+		switch type {
+		case .hz:
+			let text = items.text[row].text
+			return (type, text, nil, nil, nil)
+		case .picture:
+			let pictureData = items.pictures[row]
 			return (type, pictureData.text, pictureData.image, nil, nil)
 		case .selector:
-			guard let selectorData = items.data[view] as? Selector else { break }
-			return (type, nil, nil, selectorData.variants, selectorData.selectedId)
+			let selectorData = items.selectors[row]
+			let selectedIndex = selectorData.selectedIndex ?? 0
+			let texts = selectorData.texts
+			return (type, nil, nil, texts, selectedIndex)
 		default:
 			break
 		}
@@ -74,29 +88,26 @@ class MainPresenter: MainPresenterProtocol {
 		return (type: nil, nil, nil, nil, nil)
 	}
 	
-	func onSelection(by index: Int) {
-		let type = items.order[index]
+	func onSelection(by indexPath: IndexPath) {
+		let type = items.order[indexPath.section]
 		view?.showAlert(title: "Selected type is \(type)", message: "")
 	}
 	//Set new selected row for Selector Entity
-	func updateSelection(on index: Int, to id: Int) {
-		let key = items.order[index]
-		if let item = items.data[key] as? Selector {
-			let variants = item.variants
-			let newSelector = Selector(variants: variants, selectedId: id)
-			items.data.updateValue(newSelector, forKey: key)
+	func updateSelection(on indexPath: IndexPath, to id: Int) {
+		if items.order[indexPath.section] == "selector" {
+			items.selectors[indexPath.row].selectedIndex = id
 		}
-		getSelectedIdFor(selectorID: index)
+		getSelectedIdFor(indexPath: indexPath)
 
 	}
 	
 	//Get current selected row for Selector Entitty
-	private func getSelectedIdFor(selectorID: Int) {
-		let key = items.order[selectorID]
-		if let item = items.data[key] as? Selector {
-			let type = items.order[selectorID]
-			view?.showAlert(title: "Selected type is \(type)", message: "Selected id is \(item.selectedId)")
-		}
+	private func getSelectedIdFor(indexPath: IndexPath) {
+
+		let selector = items.selectors[indexPath.row]
+			let type = items.order[indexPath.section]
+			view?.showAlert(title: "Selected type is \(type)", message: "Selected id is \(selector.selectedID)")
+		
 	}
 	
 	private func loadData() {

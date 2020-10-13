@@ -9,7 +9,7 @@
 import UIKit
 
 protocol SelectorCellDelegate {
-	func valueChanged(row: Int, in pickerTag: Int)
+	func valueChanged(to row: Int, in pickerView: UIPickerView)
 }
 
 class SelectorCell: UITableViewCell {
@@ -19,17 +19,16 @@ class SelectorCell: UITableViewCell {
 	@IBOutlet weak var cellPickerView: UIPickerView!
 	var delegate: SelectorCellDelegate?
 	
-	var selectorData: [Int : String]?
+	var selectorData: [String]? //[Int : String]?
 	
     override func awakeFromNib() {
         super.awakeFromNib()
 		cellPickerView.delegate = self
 		cellPickerView.dataSource = self
+		
     }
 
-	
-
-    
+ 
 }
 
 
@@ -40,7 +39,7 @@ extension SelectorCell: UIPickerViewDelegate, UIPickerViewDataSource {
 	
 	func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
 		guard let selector = selectorData else { return nil}
-		return Array(selector.values)[row]
+		return selector[row] //Array(selector.values)[row]
 	}
 	
 	func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
@@ -49,7 +48,7 @@ extension SelectorCell: UIPickerViewDelegate, UIPickerViewDataSource {
 	}
 	
 	func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-		delegate?.valueChanged(row: row, in: cellPickerView.tag)
+		delegate?.valueChanged(to: row, in: cellPickerView)
 	}
 	
 	

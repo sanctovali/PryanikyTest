@@ -35,27 +35,66 @@ struct Picture: JSONDecodable {
 	}
 }
 
-struct Selector: JSONDecodable {
-	let variants: [Int : String]
-	var selectedId: Int
+struct Selector {
+	let variants: [Variant]
+	var selectedID: Int
 	
+	var texts: [String] {
+		return variants.map({$0.text})
+	}
+	
+	var selectedIndex: Int? {
+		get {
+			var selectedIndex: Int?
+				for (index, variant) in variants.enumerated() {
+					if variant.id == selectedID {
+						selectedIndex = index
+						break
+					}
+				}
+				return selectedIndex
+		}
+		
+		set {
+			guard let selectedIndex = newValue, selectedIndex < variants.count else { return }
+			let text = variants[selectedIndex].text
+			for variant in variants {
+				if variant.text == text {
+					selectedID = variant.id
+					break
+				}
+			}
+			
+		}
+	
+	}
+
+
+	init(variants: [Variant], selectedID: Int) {
+		self.selectedID = selectedID
+		self.variants = variants
+	}
+	
+}
+
+extension Selector: JSONDecodable {
 	init?(JSON: [String : AnyObject]) {
-		guard let selectedId = JSON["selectedId"] as? Int,
+		guard let selectedID = JSON["selectedId"] as? Int,
 			let variantsArray = JSON["variants"] as? [[String : AnyObject]] else { return nil }
-		var variants: [Int : String] = [:]
+		var variants: [Variant] = []
 		variantsArray.forEach { (variantsDictionary) in
 			if let id = variantsDictionary["id"] as? Int,
 				let text = variantsDictionary["text"] as? String {
-				variants[id] = text
+				let variant = Variant(id: id, text: text)
+				variants.append(variant)
 			}
 		}
 		self.variants = variants
-		self.selectedId = selectedId
+		self.selectedID = selectedID
 	}
-	
-	init(variants: [Int : String], selectedId: Int) {
-		self.selectedId = selectedId
-		self.variants = variants
-	}
-	
+}
+
+struct Variant {
+	let id: Int
+	let text: String
 }

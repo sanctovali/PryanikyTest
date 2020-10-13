@@ -14,6 +14,7 @@ enum RequestType: FinalURLPoint{
     case Sample
     
     var baseURL: URL {
+
         return URL(string: "https://pryaniky.com")!
     }
     
@@ -46,12 +47,11 @@ final class PryanikyDataManager: APIManager {
     func fetchSampleData(completionHandler: @escaping (APIResult<PryanikyData>) -> Void) {
 		let request = RequestType.Sample.request
         fetch(request: request, parse: { (json) -> PryanikyData? in
-            if let dictionary = json{
+            if let dictionary = json {
                 return PryanikyData(JSON: dictionary)
             } else {
                 return nil
             }
         }, completionHandler: completionHandler)
-        
     }
 }
