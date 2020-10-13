@@ -9,8 +9,6 @@
 import UIKit
 
 
-
-
 struct Hz: JSONDecodable {
 	let text: String
 	
@@ -46,13 +44,13 @@ struct Selector {
 	var selectedIndex: Int? {
 		get {
 			var selectedIndex: Int?
-				for (index, variant) in variants.enumerated() {
-					if variant.id == selectedID {
-						selectedIndex = index
-						break
-					}
+			for (index, variant) in variants.enumerated() {
+				if variant.id == selectedID {
+					selectedIndex = index
+					break
 				}
-				return selectedIndex
+			}
+			return selectedIndex
 		}
 		
 		set {
@@ -64,12 +62,9 @@ struct Selector {
 					break
 				}
 			}
-			
 		}
-	
 	}
-
-
+		
 	init(variants: [Variant], selectedID: Int) {
 		self.selectedID = selectedID
 		self.variants = variants

@@ -48,8 +48,7 @@ class MainPresenter: MainPresenterProtocol {
 	}
 	
 	func rowsInSection(_ section: Int) -> Int {
-		let view = items.order[section]
-		let type = PossibleTypes.init(rawValue: view)
+		let type = items.order[section]
 		
 		switch type {
 		case .hz:
@@ -58,15 +57,11 @@ class MainPresenter: MainPresenterProtocol {
 			return items.pictures.count
 		case .selector:
 			return items.selectors.count
-		default:
-			return 0
 		}
 	}
 
 	func getData(on indexPath: IndexPath) -> CellData {
-		let view = items.order[indexPath.section]
-		
-		let type = PossibleTypes.init(rawValue: view)
+		let type = items.order[indexPath.section]
 		let row = indexPath.row
 		
 		switch type {
@@ -81,11 +76,7 @@ class MainPresenter: MainPresenterProtocol {
 			let selectedIndex = selectorData.selectedIndex ?? 0
 			let texts = selectorData.texts
 			return (type, nil, nil, texts, selectedIndex)
-		default:
-			break
 		}
-		
-		return (type: nil, nil, nil, nil, nil)
 	}
 	
 	func onSelection(by indexPath: IndexPath) {
@@ -94,7 +85,7 @@ class MainPresenter: MainPresenterProtocol {
 	}
 	//Set new selected row for Selector Entity
 	func updateSelection(on indexPath: IndexPath, to id: Int) {
-		if items.order[indexPath.section] == "selector" {
+		if items.order[indexPath.section] == .selector {
 			items.selectors[indexPath.row].selectedIndex = id
 		}
 		getSelectedIdFor(indexPath: indexPath)
@@ -106,7 +97,7 @@ class MainPresenter: MainPresenterProtocol {
 
 		let selector = items.selectors[indexPath.row]
 			let type = items.order[indexPath.section]
-			view?.showAlert(title: "Selected type is \(type)", message: "Selected id is \(selector.selectedID)")
+		view?.showAlert(title: "Selected type is \(type.rawValue)", message: "Selected id is \(selector.selectedID)")
 		
 	}
 	

@@ -8,7 +8,7 @@
 
 import UIKit
 
-typealias CellData = (type: PossibleTypes?, text: String?, image: UIImage?, variant: [String]?, id: Int?) //variant: [Int : String]?
+typealias CellData = (type: ValidTypes?, text: String?, image: UIImage?, variant: [String]?, id: Int?)
 
 class MainViewController: UIViewController {
 	
@@ -22,8 +22,6 @@ class MainViewController: UIViewController {
 		return indicator
 	}()
 	
-	var orderCounder: Int = 0
-	
 	fileprivate lazy var presenter: MainPresenterProtocol = MainPresenter(view: self)
 	
 	override func viewDidLoad() {
@@ -31,24 +29,7 @@ class MainViewController: UIViewController {
 		presenter.onViewDidLoad()
 		setupViews()
 	}
-	
-	override func viewWillAppear(_ animated: Bool) {
-		super.viewWillAppear(animated)
-		print(Date())
-		
-		DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
-			print(Date())
-		}
-	}
-	
-	override func viewDidAppear(_ animated: Bool) {
-		super.viewDidAppear(animated)
-		DispatchQueue.main.asyncAfter(deadline: .now()) {
-			print(Date())
-		}
-	}
 
-	
 	fileprivate func setupViews() {
 		setupTableView()
 		setupActivityIndicator()
